@@ -1,0 +1,38 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Обновление системы и очистка кэша пакетного менеджера
+      apt:
+        update_cache: yes
+        upgrade: dist
+        autoclean: yes
+
+    - name: Добавление Docker репозитория
+      apt_repository:
+        repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable'
+        state: present
+
+    - name: Добавление GitLab Runner репозитория
+      apt_repository:
+        repo: 'deb https://packages.gitlab.com/runner/gitlab-runner/ubuntu/ $(lsb_release -cs) main'
+        state: present
+
+    - name: Установка необходимых пакетов
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose
+          - git
+          - gitlab-runner
+          - traceroute
+        state: present
+
+    - name: Запуск и включение Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: true
+
